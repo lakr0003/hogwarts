@@ -1,0 +1,44 @@
+
+Grunden til at vi skriver teksten på denne måde er for at kave en skriftlig skabelon for hvordan koden bør udføres. 
+Det skriftlige som er skrevet skal følges i koden - det skal være ens. 
+
+Get single teacher: 
+	GET /teachers/:id
+	    Find id’et fra routen (requesten)
+	    Find det element i databasen med det id
+
+	Hvis der ikke var noget - return 404
+	Ellers: 
+		Lav element om til json
+		Returner det med en 200
+
+
+Put teacher: 
+	PUT /teachers/:id
+	    Find id’et fra routen (requesten)
+	    Find det element i databasen med det id
+
+	Hvis den ikke findes i databasen - return 404
+	Ellers: 
+		Find vores body-teacher
+		
+        Ændre name og house i datbase-teacheren til samme som body-teacheren
+        Gem databse-teacheren i databasen - ved kald af query'en gemmes det i databasen. 
+
+        Lav database-teacheren om til json
+        Returner den med 200
+
+
+
+*trycatch tager ikke højde for at der er noget der kan gå galt (kode eksempel fra sandbox m. christian) - teksten ovenover tager højde for at noget kan gå galt 
+christian udfører sit således - det er dog en lidt hurtig metode: 
+Put teacher: 
+	PUT /teachers/:id
+	 find vores body-teachjer
+
+     prøv at se opdatere databasen med data fra body-teacher på den teacher. hvis id er id'et fra routen, og hente den opdaterede database-teacher. 
+
+     hvis der ikke var noget at hente fra databasen, return 404
+     ellers retuner den hentede database-teachers med en 200
+
+	

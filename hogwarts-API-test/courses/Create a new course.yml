@@ -8,7 +8,7 @@ http:
   url: http://localhost:3000/courses
   body:
     type: json
-    data: '{ "name": "Test Course 9", "teacher_id": 4 }'
+    data: '{ "name": "Test Course", "teacher_id": 4 }'
   auth: inherit
 
 settings:

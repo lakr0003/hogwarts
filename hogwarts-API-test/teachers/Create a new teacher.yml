@@ -8,7 +8,7 @@ http:
   url: http://localhost:3000/teachers
   body:
     type: json
-    data: '{ "name": "Test Teacher5", "house_id": 3 }'
+    data: '{ "name": "Test Teacher", "house_id": 3 }'
   auth: inherit
 
 settings:

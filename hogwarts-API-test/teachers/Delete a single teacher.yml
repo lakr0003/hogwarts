@@ -5,10 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: http://localhost:3000/teachers/1
-  body:
-    type: json
-    data: ""
+  url: http://localhost:3000/teachers/100
   auth: inherit
 
 settings:

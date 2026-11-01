@@ -103,3 +103,4 @@ Pseudokode for endpoints står i [PSEUDOKODE.md](PSEUDOKODE.md).
 ## Note
 
 - Endpointet til at fjerne en student fra et course er ikke lavet.
+- Backup af databasen fra pgAdmin kunne ikke eksporteres (processen blev ved med at stå på "Running"). Derfor er hogwarts.sql blevet udarbejdet med hjælp fra AI ud fra mit tabelskema og mine eksempeldata fra pgAdmin og efterfølgende er den testet på en tom database.

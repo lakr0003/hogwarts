@@ -7,6 +7,8 @@ import { pool } from "./db.js";
 
 import * as houseRepository from "./repositories/houses.repository.js";
 import * as teacherRepository from "./repositories/teachers.repository.js";
+import * as studentRepository from "./repositories/students.repository.js";
+import * as courseRepository from "./repositories/courses.repository.js";
 
 const app = express();
 const port = 3000;
@@ -30,10 +32,10 @@ app.get("/houses", async function (req, res) {
 app.get("/houses/:id", async function (req, res) {
   try {
     const id = req.params.id; //I controlleren ”fisker” vi id ud af req.params
-    const house = await houseRepository.getHouseById(id); //sender id videre til repository
+    const singleHouse = await houseRepository.getHouseById(id); //sender id videre til repository
 
-    if (house) {
-      res.status(200).json(house); //hvis repository returnerede et objekt så sender vi det som JSON
+    if (singleHouse) {
+      res.status(200).json(singleHouse); //hvis repository returnerede et objekt så sender vi det som JSON
     } else {
       res.sendStatus(404); //hvis repository returnerede null så sender vi 404 Not Found
     }
@@ -57,13 +59,12 @@ app.get("/teachers", async function (req, res) {
 
 //GET request to READ teacher by id
 app.get("/teachers/:id", async function (req, res) {
-  //benytter arrwofunction
   try {
     const id = req.params.id; //I controlleren ”fisker” vi id ud af req.params
-    const teacher = await teacherRepository.getTeacherById(id); //sender id videre til repository
+    const singleTeacher = await teacherRepository.getTeacherById(id); //sender id videre til repository
 
-    if (teacher) {
-      res.status(200).json(teacher); //hvis repository returnerede et objekt så sender vi det som JSON
+    if (singleTeacher) {
+      res.status(200).json(singleTeacher); //hvis repository returnerede et objekt så sender vi det som JSON
     } else {
       res.sendStatus(404); //hvis repository returnerede null så sender vi 404 Not Found
     }
@@ -78,10 +79,10 @@ app.put("/teachers/:id", async function (req, res) {
   try {
     const id = req.params.id;
     const { name, house_id } = req.body;
-    const teacher = await teacherRepository.putTeacherById(name, house_id, id);
+    const updTeacher = await teacherRepository.putTeacherById(name, house_id, id);
 
-    if (teacher) {
-      res.status(200).json(teacher);
+    if (updTeacher) {
+      res.status(200).json(updTeacher);
     } else {
       res.sendStatus(404);
     }
@@ -95,16 +96,9 @@ app.put("/teachers/:id", async function (req, res) {
 app.post("/teachers", async function (req, res) {
   try {
     const { name, house_id } = req.body;
-    // const post = await teacherRepository.postTeacherById(name, house_id);
+    const postTeacher = await teacherRepository.postTeacher(name, house_id);
 
-    const postTeacher = await pool.query(
-      `INSERT INTO hogwarts_api.teachers (name, house_id)
-      VALUES ($1, $2)
-      RETURNING id, name, house_id`,
-      [name, house_id],
-    );
-
-    res.status(201).json(postTeacher.rows[0]);
+    res.status(201).json(postTeacher);
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Error connecting to database" });
@@ -115,16 +109,12 @@ app.post("/teachers", async function (req, res) {
 app.delete("/teachers/:id", async function (req, res) {
   const id = req.params.id;
   try {
-    const deleteTeacher = await pool.query(
-      `DELETE FROM hogwarts_api.teachers
-      WHERE id = $1
-      RETURNING id`,
-      [id],
-    );
-    if (deleteTeacher.rowCount === 0) {
-      res.sendStatus(404);
-    } else {
+    const deleteTeacher = await teacherRepository.deleteTeacherById(id);
+
+    if (deleteTeacher) {
       res.sendStatus(204);
+    } else {
+      res.sendStatus(404);
     }
   } catch (error) {
     console.error(error);
@@ -136,11 +126,8 @@ app.delete("/teachers/:id", async function (req, res) {
 //GET request to READ students
 app.get("/students", async function (req, res) {
   try {
-    // const allStudents = await teacherRepository.getAllTeachers(); //Vi kalder funktionen i repositoriet
-    const allStudents = await pool.query(`SELECT * FROM hogwarts_api.students`);
-
-    // res.json(allStudents); //Og sender det, den returnerede, som JSON
-    res.status(200).json(allStudents.rows);
+    const allStudents = await studentRepository.getAllStudents(); //Vi kalder funktionen i repositoriet
+    res.json(allStudents); //Og sender det, den returnerede, som JSON
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Error connecting to database" });
@@ -151,19 +138,12 @@ app.get("/students", async function (req, res) {
 app.get("/students/:id", async function (req, res) {
   try {
     const id = req.params.id;
-    // const student = await studentRepository.getStudentById(id);
-    const student = await pool.query(`SELECT * FROM hogwarts_api.students WHERE id = $1`, [id]);
+    const singleStudent = await studentRepository.getStudentById(id);
 
-    // if (student) {
-    //   res.status(200).json(student); //hvis repository returnerede et objekt så sender vi det som JSON
-    // } else {
-    //   res.sendStatus(404); //hvis repository returnerede null så sender vi 404 Not Found
-    // }
-
-    if (student.rowCount === 0) {
-      res.sendStatus(404);
+    if (singleStudent) {
+      res.status(200).json(singleStudent); //hvis repository returnerede et objekt så sender vi det som JSON
     } else {
-      res.status(200).json(student.rows[0]);
+      res.sendStatus(404); //hvis repository returnerede null så sender vi 404 Not Found
     }
   } catch (error) {
     console.error(error);
@@ -177,24 +157,12 @@ app.put("/students/:id", async function (req, res) {
     const id = req.params.id;
     const { name, house_id, year } = req.body;
 
-    // const student = await studentRepository.putStudentById(name, house_id, id);
-    const student = await pool.query(
-      `UPDATE hogwarts_api.students SET name = $1, house_id = $2, year = $3
-      WHERE id = $4
-      RETURNING id, name, house_id, year`,
-      [name, house_id, year, id],
-    );
+    const updStudent = await studentRepository.putStudentById(name, house_id, year, id);
 
-    // if (student) {
-    //   res.status(200).json(student);
-    // } else {
-    //   res.sendStatus(404);
-    // }
-
-    if (student.rowCount === 0) {
-      res.sendStatus(404);
+    if (updStudent) {
+      res.status(200).json(updStudent);
     } else {
-      res.status(200).json(student.rows[0]);
+      res.sendStatus(404);
     }
   } catch (error) {
     console.error(error);
@@ -206,14 +174,9 @@ app.put("/students/:id", async function (req, res) {
 app.post("/students", async function (req, res) {
   try {
     const { name, house_id, year } = req.body;
+    const postStudent = await studentRepository.postStudent(name, house_id, year);
 
-    const postStudent = await pool.query(
-      `INSERT INTO hogwarts_api.students (name, house_id, year)
-      VALUES ($1, $2, $3)
-      RETURNING id, name, house_id, year`,
-      [name, house_id, year],
-    );
-    res.status(201).json(postStudent.rows[0]);
+    res.status(201).json(postStudent);
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Error connecting to database" });
@@ -224,16 +187,12 @@ app.post("/students", async function (req, res) {
 app.delete("/students/:id", async function (req, res) {
   const id = req.params.id;
   try {
-    const deleteStudent = await pool.query(
-      `DELETE FROM hogwarts_api.students
-      WHERE id = $1
-      RETURNING id`,
-      [id],
-    );
-    if (deleteStudent.rowCount === 0) {
-      res.sendStatus(404);
-    } else {
+    const deleteStudent = await studentRepository.deleteStudentById(id);
+
+    if (deleteStudent) {
       res.sendStatus(204);
+    } else {
+      res.sendStatus(404);
     }
   } catch (error) {
     console.error(error);
@@ -241,17 +200,12 @@ app.delete("/students/:id", async function (req, res) {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
-
 ////////////////////////// COURSES ////////////////////////////////////////////////
 //GET request to READ all courses
 app.get("/courses", async function (req, res) {
   try {
-    const allCourses = await pool.query(`SELECT * FROM hogwarts_api.courses`);
-
-    res.status(200).json(allCourses.rows);
+    const allCourses = await courseRepository.getAllCourses();
+    res.json(allCourses);
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Error connecting to database" });
@@ -262,12 +216,12 @@ app.get("/courses", async function (req, res) {
 app.get("/courses/:id", async function (req, res) {
   try {
     const id = req.params.id;
-    const course = await pool.query(`SELECT * FROM hogwarts_api.courses WHERE id = $1`, [id]);
+    const singleCourse = await courseRepository.getCourseById(id);
 
-    if (course.rowCount === 0) {
-      res.sendStatus(404);
+    if (singleCourse) {
+      res.status(200).json(singleCourse);
     } else {
-      res.status(200).json(course.rows[0]);
+      res.sendStatus(404);
     }
   } catch (error) {
     console.error(error);
@@ -279,15 +233,9 @@ app.get("/courses/:id", async function (req, res) {
 app.post("/courses", async function (req, res) {
   try {
     const { name, teacher_id } = req.body;
+    const postCourse = await courseRepository.postCourse(name, teacher_id);
 
-    const postCourse = await pool.query(
-      `INSERT INTO hogwarts_api.courses (name, teacher_id)
-      VALUES ($1, $2)
-      RETURNING id, name, teacher_id`,
-      [name, teacher_id],
-    );
-
-    res.status(201).json(postCourse.rows[0]);
+    res.status(201).json(postCourse);
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Error connecting to database" });
@@ -298,13 +246,9 @@ app.post("/courses", async function (req, res) {
 app.delete("/courses/:id", async function (req, res) {
   const id = req.params.id;
   try {
-    const deleteCourse = await pool.query(
-      `DELETE FROM hogwarts_api.courses
-      WHERE id = $1
-      RETURNING id`,
-      [id],
-    );
-    if (deleteCourse.rowCount === 0) {
+    const deleteCourse = await courseRepository.deleteCourseById(id);
+
+    if (deleteCourse) {
       res.sendStatus(404);
     } else {
       res.sendStatus(204);
@@ -321,18 +265,12 @@ app.put("/courses/:id", async function (req, res) {
   try {
     const id = req.params.id;
     const { name } = req.body;
+    const courseName = await courseRepository.updateCourseNameById(name, id);
 
-    const courseName = await pool.query(
-      `UPDATE hogwarts_api.courses SET name = $1
-      WHERE id = $2
-      RETURNING id, name, teacher_id`,
-      [name, id],
-    );
-
-    if (courseName.rowCount === 0) {
-      res.sendStatus(404);
+    if (courseName) {
+      res.status(200).json(courseName);
     } else {
-      res.status(200).json(courseName.rows[0]);
+      res.sendStatus(404);
     }
   } catch (error) {
     console.error(error);
@@ -345,18 +283,12 @@ app.put("/courses/:id/teacher", async function (req, res) {
   try {
     const id = req.params.id;
     const { teacher_id } = req.body;
+    const courseTeacher = await courseRepository.updateCourseTeacherById(teacher_id, id);
 
-    const courseTeacher = await pool.query(
-      `UPDATE hogwarts_api.courses SET teacher_id = $1
-      WHERE id = $2
-      RETURNING id, name, teacher_id`,
-      [teacher_id, id],
-    );
-
-    if (courseTeacher.rowCount === 0) {
-      res.sendStatus(404);
+    if (courseTeacher) {
+      res.status(200).json(courseTeacher);
     } else {
-      res.status(200).json(courseTeacher.rows[0]);
+      res.sendStatus(404);
     }
   } catch (error) {
     console.error(error);
@@ -369,15 +301,9 @@ app.post("/courses/:id/students", async function (req, res) {
   try {
     const id = req.params.id;
     const { student_id } = req.body;
+    const addStudent = await courseRepository.postStudentToCourse(id, student_id);
 
-    const addStudent = await pool.query(
-      `INSERT INTO hogwarts_api.course_students (course_id, student_id)
-      VALUES ($1, $2)
-      RETURNING course_id, student_id`,
-      [id, student_id],
-    );
-
-    res.status(201).json(addStudent.rows[0]);
+    res.status(201).json(addStudent);
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Error connecting to database" });
@@ -404,3 +330,7 @@ app.post("/courses/:id/students", async function (req, res) {
 //     res.status(500).send({ message: "Error connecting to database" });
 //   }
 // });
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});

@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: http://localhost:3000/courses/1/students
+  url: http://localhost:3000/courses/4/students
   body:
     type: json
     data: '{ "student_id": 3 }'

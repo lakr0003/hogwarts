@@ -6,6 +6,9 @@ info:
 http:
   method: POST
   url: http://localhost:3000/students
+  body:
+    type: json
+    data: '{ "name": "Luna Lovegood", "house_id": 3, "year": 2 }'
   auth: inherit
 
 settings:

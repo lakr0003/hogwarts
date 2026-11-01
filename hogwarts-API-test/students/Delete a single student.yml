@@ -5,11 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: http://localhost:3000/students/:id
-  params:
-    - name: id
-      value: ""
-      type: path
+  url: http://localhost:3000/students/8
   auth: inherit
 
 settings:

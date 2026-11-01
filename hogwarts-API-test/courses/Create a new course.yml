@@ -1,0 +1,18 @@
+info:
+  name: Create a new course
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: http://localhost:3000/courses
+  body:
+    type: json
+    data: '{ "name": "Test Course 5", "teacher_id": 4 }'
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

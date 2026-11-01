@@ -5,11 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:3000/students/:id
-  params:
-    - name: id
-      value: ""
-      type: path
+  url: http://localhost:3000/students/1
   auth: inherit
 
 settings:

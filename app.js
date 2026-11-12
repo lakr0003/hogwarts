@@ -1,5 +1,6 @@
 //const express = require("express");
 import express from "express";
+import errorhandler from "./errorhandling/errorhandler.js";
 
 //database connection
 //const { Pool } = require("pg");
@@ -59,6 +60,9 @@ app.use("/courses/", courseRouter);
 //     res.status(500).send({ message: "Error connecting to database" });
 //   }
 // });
+
+//denne skal altid indsættes til aller sidst
+app.use(errorhandler);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
